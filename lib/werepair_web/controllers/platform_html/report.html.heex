@@ -1,0 +1,12 @@
+<Layouts.app flash={@flash} current_scope={@current_scope}>
+  <h1>Report content</h1><p>
+    Report {@type} #{@target_id}. The organiser reviews reports privately.
+  </p>
+  <.form for={@form} action={~p"/reports"} id="report-form">
+    <.input type="hidden" name="type" value={@type} /><.input
+      type="hidden"
+      name="target_id"
+      value={@target_id}
+    /><.input field={@form[:reason]} type="textarea" label="What happened?" required /><button>Send report</button>
+  </.form>
+</Layouts.app>

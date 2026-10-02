@@ -1,0 +1,7 @@
+[formatter.nix]
+command = "nixpkgs-fmt"
+includes = ["flake.nix"]
+
+[formatter.markdown]
+command = "mdformat"
+includes = ["README.md"]

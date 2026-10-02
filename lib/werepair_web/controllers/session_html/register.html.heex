@@ -1,0 +1,25 @@
+<Layouts.app flash={@flash} current_scope={@current_scope}>
+  <h1>One account. Help, repair and learn.</h1>
+  <.form for={@form} action={~p"/register"} id="register-form">
+    <.input field={@form[:name]} label="Real name" required />
+    <.input field={@form[:email]} label="Email" type="email" required autocomplete="username" />
+    <.input
+      field={@form[:password]}
+      label="Password (12 characters minimum)"
+      type="password"
+      minlength="12"
+      required
+      autocomplete="new-password"
+    />
+    <.input field={@form[:phone]} label="Phone (private, unverified)" type="tel" required />
+    <.input field={@form[:area]} label="Neighbourhood" required />
+    <.input
+      field={@form[:adult]}
+      label="I am 18 or older and agree to the community rules."
+      type="checkbox"
+      required
+    />
+    <p><a href={~p"/about"}>Read the rules and privacy notice</a>.</p>
+    <button>Create account</button>
+  </.form>
+</Layouts.app>

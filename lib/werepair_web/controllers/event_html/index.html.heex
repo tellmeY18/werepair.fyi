@@ -1,0 +1,18 @@
+<Layouts.app flash={@flash} current_scope={@current_scope}>
+  <h1>Repair events</h1><p>
+    Bring your broken item, offer your skills, or learn beside a technician.
+  </p>
+  <a :if={@current_scope && @current_scope.admin} class="button" href={~p"/events/new"}>Create an event</a>
+  <div class="cards" id="events">
+    <p :if={@events == []}>No events yet. Check back soon or post a repair request.</p><article
+      :for={event <- @events}
+      id={"event-#{event.id}"}
+    >
+      <h2><a href={~p"/events/#{event.id}"}>{event.title}</a></h2><p>
+        {Calendar.strftime(event.starts_at, "%d %b %Y, %H:%M")} IST · {event.venue}
+      </p><p>{event.theme}</p><span class="badge">{if event.completed,
+        do: "Completed",
+        else: "Open for sign-ups"}</span>
+    </article>
+  </div>
+</Layouts.app>

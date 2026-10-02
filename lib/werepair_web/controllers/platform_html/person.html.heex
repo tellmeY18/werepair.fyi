@@ -1,0 +1,23 @@
+<Layouts.app flash={@flash} current_scope={@current_scope}>
+  <h1>{@person.name}</h1><p>{@person.area} · {@person.skills}</p><p class="prose">
+    {@person.bio}
+  </p><p>{@person.availability}</p>
+  <.track_record stats={@stats} />
+  <p class="notice">
+    Phone is private. Phone verification is deferred in this POC, so no account can reveal phone numbers. Use public request comments to arrange an event meeting.
+  </p>
+  <.report_link type="profile" target_id={@person.id} />
+  <.map latitude={@person.latitude} longitude={@person.longitude} />
+  <h2>Event & apprenticeship history</h2>
+  <ul id="apprenticeships">
+    <li :for={p <- @stats.events}>
+      <a href={~p"/events/#{p.event_id}"}>{p.event.title}</a>
+      · {p.kind} · {p.hours} hours <span :if={p.mentor}>with {p.mentor.name}</span>
+    </li>
+  </ul>
+  <h2>Reviews</h2><article :for={review <- @stats.reviews} id={"review-#{review.id}"}>
+    {review.stars}/5 · {review.author.name} · {Calendar.strftime(review.inserted_at, "%d %b %Y")}
+    <p>{review.body}</p><.report_link type="review" target_id={review.id} />
+  </article>
+  <h2>Repair history</h2><.request_list requests={@requests} />
+</Layouts.app>

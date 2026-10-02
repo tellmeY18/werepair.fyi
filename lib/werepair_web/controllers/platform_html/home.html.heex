@@ -1,0 +1,15 @@
+<Layouts.app flash={@flash} current_scope={@current_scope}>
+  <h1>Repair over Replace.</h1>
+  <p>Get something fixed in Kochi. Meet people who repair. Learn beside them.</p>
+  <div class="actions">
+    <a class="button" href={~p"/events"}>Find a repair event</a><a
+      class="button"
+      href={~p"/requests/new"}
+    >Get something fixed</a><a class="button secondary" href={~p"/profile"}>I fix things</a>
+  </div>
+  <p id="community-counts">
+    {@technicians} technicians · {length(@requests)} requests · {length(@events)} events · ₹0 platform commission
+  </p>
+  <h2>Community repair board</h2>
+  <.request_list requests={Enum.take(@requests, 6)} />
+</Layouts.app>

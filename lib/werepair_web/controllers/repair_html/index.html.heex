@@ -1,0 +1,7 @@
+<Layouts.app flash={@flash} current_scope={@current_scope}>
+  <h1>Repair requests</h1><a class="button" href={~p"/requests/new"}>Post a request</a>
+  <.form for={@form} action={~p"/requests"} method="get" id="request-search">
+    <.input field={@form[:q]} type="search" label="Search item, category or neighbourhood" /><button>Search</button>
+  </.form>
+  <.request_list requests={@requests} />
+</Layouts.app>

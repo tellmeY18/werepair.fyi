@@ -1,0 +1,22 @@
+<Layouts.app flash={@flash} current_scope={@current_scope}>
+  <h1>Technicians in Kochi</h1>
+  <.form for={@form} action={~p"/technicians"} method="get" id="directory-search">
+    <.input field={@form[:q]} label="Search name, skill/category or neighbourhood" type="search" /><button>Search</button>
+  </.form>
+  <p class="small">
+    Alphabetical, no paid boosts. Pins show neighbourhoods, never private home addresses. Open a profile for its map.
+  </p>
+  <.map latitude={9.9816} longitude={76.2999} />
+  <div class="cards" id="technicians">
+    <p :if={@people == []}>
+      No matching technicians yet. <a href={~p"/events"}>Try a repair event</a>
+      or <a href={~p"/learn"}>learn on the wiki</a>.
+    </p>
+    <article :for={person <- @people} id={"person-#{person.id}"}>
+      <h2><a href={~p"/people/#{person.id}"}>{person.name}</a></h2><p>
+        {person.area} · {person.skills}
+      </p><p>{person.availability}</p>
+      <.track_record stats={Werepair.Community.stats(person)} />
+    </article>
+  </div>
+</Layouts.app>

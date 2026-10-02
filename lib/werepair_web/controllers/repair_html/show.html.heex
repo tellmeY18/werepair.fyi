@@ -1,0 +1,181 @@
+<Layouts.app flash={@flash} current_scope={@current_scope}>
+  <h1>{@request.title}</h1><p>
+    <span class="badge" id="request-status">{String.replace(@request.status, "_", " ")}</span>
+    · {@request.category} · {@request.area} · {@request.mode}
+  </p>
+  <p>
+    Posted by <a href={~p"/people/#{@request.requester_id}"}>{@request.requester.name}</a>
+    · L1 account · phone unverified
+  </p>
+  <p class="prose">{@request.description}</p><p :if={@request.tried}>
+    <strong>What I've tried:</strong> {@request.tried}
+  </p>
+  <img
+    :if={@request.photo}
+    src={~p"/requests/#{@request.id}/photo"}
+    alt={"Photo of #{@request.title}"}
+  />
+  <p :if={@request.event}>
+    <a href={~p"/events/#{@request.event_id}"}>Registered for {@request.event.title}</a>
+  </p>
+  <p :if={@request.technician}>
+    Chosen technician:
+    <a href={~p"/people/#{@request.technician_id}"}>{@request.technician.name}</a>
+  </p>
+  <.report_link type="request" target_id={@request.id} />
+  <p class="notice">
+    Agree prices directly. Never pay in advance for unseen work. Meet publicly; watch, ask and learn. Mains voltage, gas, brakes, swollen batteries and medical devices need qualified help. <a href={
+      ~p"/about"
+    }>Safety & privacy</a>.
+  </p>
+  <ul :if={@errors != []} role="alert" id="form-errors">
+    <li :for={error <- @errors}>{error}</li>
+  </ul>
+  <h2>Responses & tracking log</h2>
+  <p :if={@request.entries == []}>
+    No responses yet. <a href={~p"/technicians"}>Find a technician</a>
+    or <a href={~p"/learn"}>browse the wiki</a>.
+  </p>
+  <article :for={entry <- @request.entries} id={"entry-#{entry.id}"}>
+    <strong>{entry.kind} · <a href={~p"/people/#{entry.user_id}"}>{entry.user.name}</a></strong>
+    <span class="small">{Calendar.strftime(entry.inserted_at, "%d %b %Y %H:%M UTC")}</span>
+    <p class="prose">{entry.body}</p><p :if={entry.parts}>
+      Parts: {entry.parts} · bought by: {entry.purchased_by}
+    </p><p :if={entry.price}>Price note: ₹{entry.price} (agreed off-platform)</p>
+    <.report_link type="comment" target_id={entry.id} />
+    <.form
+      :if={
+        @current_scope && @current_scope.id == @request.requester_id &&
+          @request.status in ["open", "in_talks"] && entry.user.technician &&
+          entry.user_id != @request.requester_id && !entry.user.banned && entry.kind == "comment"
+      }
+      for={%{}}
+      action={~p"/requests/#{@request.id}/choose"}
+      id={"choose-#{entry.id}"}
+    >
+      <.input type="hidden" name="technician_id" value={entry.user_id} /><button>Choose {entry.user.name}</button>
+    </.form>
+  </article>
+  <.form
+    :if={@current_scope && @request.status not in ["closed", "cancelled"]}
+    for={@entry_form}
+    action={~p"/requests/#{@request.id}/entries"}
+    id="entry-form"
+  >
+    <.input
+      name="kind"
+      id="entry-kind"
+      value="comment"
+      type="select"
+      label="Entry type"
+      options={
+        if @current_scope.id == @request.requester_id,
+          do: [{"Comment / response", "comment"}, {"Requester tracking log", "log"}],
+          else: [{"Comment / response", "comment"}]
+      }
+    />
+    <.input
+      field={@entry_form[:body]}
+      type="textarea"
+      label="Response, work performed or what you learned"
+      required
+    />
+    <.input field={@entry_form[:parts]} label="Parts / warranty (optional)" /><.input
+      field={@entry_form[:purchased_by]}
+      label="Who bought the parts? (optional)"
+    /><.input
+      field={@entry_form[:price]}
+      label="Price note (INR, optional)"
+      type="number"
+      step="0.01"
+      min="0"
+    />
+    <button>Add entry</button>
+  </.form>
+  <p :if={!@current_scope}><a href={~p"/sign-in"}>Sign in to respond</a>.</p>
+  <section :if={
+    @current_scope && @current_scope.id == @request.requester_id &&
+      @request.status not in ["closed", "cancelled"]
+  }>
+    <h2>Update outcome</h2>
+    <.form for={@status_form} action={~p"/requests/#{@request.id}/status"} id="status-form">
+      <.input
+        field={@status_form[:status]}
+        label="Next status"
+        type="select"
+        options={
+          case @request.status do
+            s when s in ["open", "in_talks"] ->
+              [{"Cancel", "cancelled"}]
+
+            "in_progress" ->
+              [
+                {"Fixed", "fixed"},
+                {"Partly fixed", "partly"},
+                {"Not fixed", "not_fixed"},
+                {"Reopen — technician cancelled", "open"},
+                {"Cancel", "cancelled"}
+              ]
+
+            _ ->
+              [{"Close and leave reviews", "closed"}]
+          end
+        }
+      />
+      <.input
+        field={@status_form[:outcome_note]}
+        type="textarea"
+        label="Outcome / short note (required)"
+        required
+      /><button>Update status</button>
+    </.form>
+  </section>
+  <section :if={@request.outcome}>
+    <h2>Outcome: {String.replace(@request.outcome, "_", " ")}</h2><p>{@request.outcome_note}</p><p>
+      {if @request.confirmed, do: "Technician confirmed", else: "Awaiting technician confirmation"}
+    </p>
+    <.form
+      :if={@current_scope && @current_scope.id == @request.technician_id}
+      for={@status_form}
+      action={~p"/requests/#{@request.id}/confirm"}
+      id="confirm-form"
+    >
+      <.input
+        field={@status_form[:credit_consent]}
+        type="checkbox"
+        label="I consent to being credited by name in the public wiki journal."
+      /><button>Confirm outcome</button>
+    </.form>
+    <a
+      :if={@current_scope && @current_scope.id == @request.requester_id}
+      class="button"
+      id="journal-link"
+      href={~p"/requests/#{@request.id}/journal"}
+    >Publish journal to wiki</a>
+    <p :if={@request.wiki_url}><a href={@request.wiki_url}>Read the linked wiki journal</a></p>
+  </section>
+  <section :if={@request.status == "closed"}>
+    <h2>Reviews</h2><p>
+      Reviews are published after both participants submit. One review per person, tied to this repair.
+    </p>
+    <article :for={review <- @reviews} id={"review-#{review.id}"}>
+      {review.stars}/5 · {review.author.name}
+      <p>{review.body}</p><.report_link type="review" target_id={review.id} />
+    </article>
+    <.form
+      :if={
+        @current_scope && @current_scope.id in [@request.requester_id, @request.technician_id] &&
+          !Enum.any?(@request.reviews, &(&1.author_id == @current_scope.id))
+      }
+      for={@review_form}
+      action={~p"/requests/#{@request.id}/reviews"}
+      id="review-form"
+    >
+      <.input field={@review_form[:stars]} type="select" label="Rating" options={[5, 4, 3, 2, 1]} /><.input
+        field={@review_form[:body]}
+        type="textarea"
+        label="Short review (optional)"
+      /><button>Submit review</button>
+    </.form>
+  </section>
+</Layouts.app>

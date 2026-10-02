@@ -1,0 +1,10 @@
+*
+!Dockerfile
+!mix.exs
+!mix.lock
+!config/
+!config/**
+!lib/
+!lib/**
+!priv/
+!priv/**

@@ -1,0 +1,32 @@
+<Layouts.app flash={@flash} current_scope={@current_scope}>
+  <h1>Publish your repair journal</h1><p>
+    The tracking log is prefilled below. Check it for personal details, then copy into the MediaWiki editor. Photos, phone numbers and emails are not exported. Technician credit is included only with their consent.
+  </p>
+  <p>
+    Publishing means sharing under <strong>CC BY-SA 4.0</strong>. This is a manual handoff: the platform only records a link after you save the wiki page.
+  </p>
+  <.form for={%{}} id="journal-draft">
+    <.input
+      id="journal-text"
+      name="journal"
+      type="textarea"
+      label="Editable wiki draft — review and copy"
+      value={@text}
+      rows="24"
+    />
+  </.form>
+  <a
+    class="button"
+    id="wiki-editor"
+    href={Werepair.Wiki.editor_url(@request)}
+    target="_blank"
+    rel="noopener noreferrer"
+  >Open MediaWiki editor</a>
+  <h2>After publishing</h2><.form
+    for={@form}
+    action={~p"/requests/#{@request.id}/wiki"}
+    id="wiki-link-form"
+  >
+    <.input field={@form[:wiki_url]} type="url" label="Published journal URL" required /><button>Link published journal</button>
+  </.form>
+</Layouts.app>

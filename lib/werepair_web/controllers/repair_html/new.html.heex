@@ -1,0 +1,45 @@
+<Layouts.app flash={@flash} current_scope={@current_scope}>
+  <h1>What needs fixing?</h1><p>
+    One item per request. Describe what you know; you don't need to know the diagnosis.
+  </p>
+  <.form for={@form} action={~p"/requests"} multipart id="request-form">
+    <.input field={@form[:title]} label="Item / short title" required /><.input
+      field={@form[:description]}
+      label="Symptoms / what's broken?"
+      type="textarea"
+      required
+    />
+    <.input field={@form[:tried]} label="What have you tried? (optional)" type="textarea" />
+    <.input
+      field={@form[:category]}
+      label="Category"
+      type="select"
+      options={Werepair.Repairs.Request.categories()}
+    />
+    <.input field={@form[:area]} label="Neighbourhood (not your exact address)" required />
+    <.input
+      field={@form[:mode]}
+      label="How would you like help?"
+      type="select"
+      options={Werepair.Repairs.Request.modes()}
+    />
+    <.input
+      name="request[photo]"
+      id="request-photo"
+      value={nil}
+      type="file"
+      accept="image/jpeg,image/png"
+      label="Public photo (PNG/JPEG, up to 2 MB)"
+    />
+    <p class="small">
+      No faces, addresses, serial numbers or private data. Nothing is uploaded to Commons automatically.
+    </p>
+    <.input
+      field={@form[:document_consent]}
+      type="checkbox"
+      label="I will document the repair and its outcome."
+      required
+    />
+    <button id="post-request">Post request</button>
+  </.form>
+</Layouts.app>

@@ -1,0 +1,25 @@
+<Layouts.app flash={@flash} current_scope={@current_scope}>
+  <h1>Learn to repair</h1><p>
+    Our knowledge base is MediaWiki. Guides, models and repair journals are shared under CC BY-SA 4.0. Use a separate wiki account to edit.
+  </p>
+  <a class="button" href={Werepair.Wiki.base_url()}>Open the repair wiki</a>
+  <p class="notice">
+    MediaWiki is external and is not deployed with this POC. Journal drafts can be reviewed in the app; publish them when the wiki is available.
+  </p>
+  <h2>Start here</h2><ul>
+    <li :for={
+      title <- [
+        "Safety first",
+        "Before handing over a device",
+        "Getting started with repair",
+        "Repair journals",
+        "Responsible e-waste disposal"
+      ]
+    }>
+      <a href={Werepair.Wiki.page_url(title)}>{title}</a>
+    </li>
+  </ul>
+  <h2>Learn beside someone</h2><p>
+    Join an event as an apprentice. A technician with at least two completed repairs accepts you and records your hours. These appear on your public profile.
+  </p><a href={~p"/events"}>Find an apprenticeship at an event</a>
+</Layouts.app>

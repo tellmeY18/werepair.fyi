@@ -1,0 +1,138 @@
+<Layouts.app flash={@flash} current_scope={@current_scope}>
+  <h1>{@event.title}</h1><p>
+    {Calendar.strftime(@event.starts_at, "%d %b %Y, %H:%M")} IST · {@event.venue}
+  </p><p>{@event.theme}</p><p>
+    Organised by <a href={~p"/people/#{@event.organizer_id}"}>{@event.organizer.name}</a>
+  </p>
+  <.map latitude={@event.latitude} longitude={@event.longitude} />
+  <p class="notice prose">{@event.rules}</p><p>
+    Independent repairs, no platform insurance. Read the <a href={~p"/about"}>organiser responsibilities and safety notice</a>.
+  </p>
+  <ul :if={@errors != []} role="alert" id="form-errors">
+    <li :for={error <- @errors}>{error}</li>
+  </ul>
+  <section :if={@event.completed} id="event-summary">
+    <h2>Event summary</h2><p class="prose">{@event.summary}</p><p>
+      {Enum.count(@event.participations, &(&1.status == "attended"))} attendance records · {Enum.count(
+        @event.requests,
+        &(!is_nil(&1.outcome))
+      )} documented outcomes
+    </p>
+  </section>
+  <h2>People & apprenticeships</h2><p class="small">
+    Mentors need two completed repairs as technician. Apprentices can join more than one mentor. Only that mentor confirms their hours.
+  </p>
+  <p :if={@event.participations == []}>Be the first to sign up.</p>
+  <article :for={p <- @event.participations} id={"participation-#{p.id}"}>
+    <h3><a href={~p"/people/#{p.user_id}"}>{p.user.name}</a> · {p.kind}</h3><p>{p.note}</p><p>
+      {p.status} · {p.hours} hours <span :if={p.mentor}>· mentor: {p.mentor.name}</span>
+    </p>
+    <.form
+      :if={
+        @current_scope &&
+          ((p.kind == "apprentice" && p.mentor_id == @current_scope.id) ||
+             (p.kind != "apprentice" && @event.organizer_id == @current_scope.id))
+      }
+      for={
+        Phoenix.Component.to_form(%{"status" => p.status, "hours" => p.hours}, as: :participation)
+      }
+      action={~p"/events/#{@event.id}/participations/#{p.id}"}
+      id={"attendance-#{p.id}"}
+    >
+      <.input
+        name="participation[status]"
+        id={"attendance-status-#{p.id}"}
+        value={p.status}
+        label="Record status"
+        type="select"
+        options={
+          if p.kind == "apprentice",
+            do: ["accepted", "declined", "attended", "no_show"],
+            else: ["attended", "no_show"]
+        }
+      />
+      <.input
+        :if={p.kind == "apprentice"}
+        name="participation[hours]"
+        id={"hours-#{p.id}"}
+        value={p.hours}
+        label="Supervised hours (1–24 if attended)"
+        type="number"
+        min="0"
+        max="24"
+      /><button>Save attendance / acceptance</button>
+    </.form>
+  </article>
+  <section :if={!@event.completed && @current_scope}>
+    <h2>Join this event</h2><.form
+      for={@form}
+      action={~p"/events/#{@event.id}/join"}
+      id="join-event-form"
+    >
+      <.input
+        field={@form[:kind]}
+        type="select"
+        label="How will you participate?"
+        options={
+          if @current_scope.technician,
+            do: ["technician", "apprentice", "requester"],
+            else: ["apprentice", "requester"]
+        }
+      />
+      <.input
+        field={@form[:mentor_id]}
+        type="select"
+        label="Mentor (required only for apprentices)"
+        prompt="Select a mentor"
+        options={@mentors}
+      />
+      <.input
+        field={@form[:note]}
+        label="Skills offered / what you'd like to learn or bring"
+        type="textarea"
+        required
+      /><.input
+        field={@form[:consent]}
+        type="checkbox"
+        label="I have read the safety rules, will stay with my item, and understand the organiser notice."
+        required
+      /><button>Join event</button>
+    </.form>
+    <h2>Pre-register an item</h2><p>
+      <a href={~p"/requests/new"}>Post a request first</a>, then select it here. Walk-ins are welcome too.
+    </p>
+    <.form
+      :if={@requests != []}
+      for={%{}}
+      action={~p"/events/#{@event.id}/items"}
+      id="register-item-form"
+    >
+      <.input
+        name="request_id"
+        id="item-request"
+        value={nil}
+        type="select"
+        label="My item"
+        options={Enum.map(@requests, &{&1.title, &1.id})}
+      /><button>Register item</button>
+    </.form>
+  </section>
+  <p :if={!@current_scope && !@event.completed}>
+    <a href={~p"/sign-in"}>Sign in to join or pre-register an item</a>.
+  </p>
+  <h2>Items & outcomes</h2><.request_list requests={@event.requests} />
+  <section :if={@current_scope && @current_scope.id == @event.organizer_id}>
+    <h2>Publish event summary</h2><.form
+      for={@summary_form}
+      action={~p"/events/#{@event.id}/complete"}
+      id="event-summary-form"
+    >
+      <.input
+        field={@summary_form[:summary]}
+        type="textarea"
+        label="What happened, what was repaired, what we learned"
+        required
+      /><button>Complete event & publish summary</button>
+    </.form>
+  </section>
+</Layouts.app>

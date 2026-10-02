@@ -1,0 +1,29 @@
+<Layouts.app flash={@flash} current_scope={@current_scope}>
+  <h1>Sign in</h1>
+  <.form for={@form} action={~p"/sign-in"} id="sign-in-form">
+    <.input field={@form[:email]} type="email" label="Email" required autocomplete="username" />
+    <.input
+      field={@form[:password]}
+      type="password"
+      label="Password"
+      required
+      autocomplete="current-password"
+    />
+    <button id="sign-in-submit">Sign in</button>
+  </.form>
+  <p>
+    <a href={~p"/register"}>Create an account</a>
+    · Recovery: <a href="mailto:hello@werepair.fyi">contact the organiser</a>.
+  </p>
+  <section :if={Application.get_env(:werepair, :demo, false)} class="notice">
+    <h2>Demo accounts</h2>
+    <p>Password for all: <code>RepairDemo2026!</code></p>
+    <ul>
+      <li>Requester: <code>asha@example.test</code></li><li>
+        Technician / mentor: <code>ravi@example.test</code>
+      </li><li>Apprentice: <code>meera@example.test</code></li><li>
+        Organiser / admin: <code>admin@example.test</code>
+      </li>
+    </ul>
+  </section>
+</Layouts.app>

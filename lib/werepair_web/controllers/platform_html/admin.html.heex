@@ -1,0 +1,54 @@
+<Layouts.app flash={@flash} current_scope={@current_scope}>
+  <h1>Organiser desk</h1><a class="button" href={~p"/events/new"}>Create an event</a>
+  <h2>Reports</h2><p :if={@reports == []}>No reports.</p>
+  <article :for={report <- @reports} id={"report-#{report.id}"}>
+    <h3>{report.target_type} #{report.target_id}</h3><p>{report.reason}</p><p>
+      Reported by {report.reporter.name} · {report.resolution || "Awaiting review"}
+    </p>
+    <a href={
+      case report.target_type do
+        "profile" ->
+          "/people/#{report.target_id}"
+
+        "request" ->
+          "/requests/#{report.target_id}"
+
+        "comment" ->
+          "/requests/#{Werepair.Repo.get!(Werepair.Repairs.Entry, report.target_id).request_id}#entry-#{report.target_id}"
+
+        "review" ->
+          "/requests/#{Werepair.Repo.get!(Werepair.Repairs.Review, report.target_id).request_id}"
+      end
+    }>View context</a>
+    <.form
+      :if={!report.resolution}
+      for={%{}}
+      action={~p"/admin/reports/#{report.id}"}
+      id={"resolve-#{report.id}"}
+    >
+      <button name="action" value="dismissed">Dismiss</button><button
+        name="action"
+        value="removed"
+      >{if report.target_type == "profile", do: "Suspend account", else: "Remove content"}</button>
+    </.form>
+  </article>
+  <h2>Add a public ledger entry</h2><.form for={@form} action={~p"/admin/costs"} id="cost-form">
+    <.input field={@form[:date]} label="Date" type="date" required /><.input
+      field={@form[:description]}
+      label="Description"
+      required
+    /><.input field={@form[:paid_by]} label="Paid by (public label)" required /><.input
+      field={@form[:kind]}
+      type="select"
+      label="Type"
+      options={["expense", "donation"]}
+    /><.input
+      field={@form[:amount]}
+      type="number"
+      step="0.01"
+      min="0"
+      label="Amount (INR)"
+      required
+    /><button>Add entry</button>
+  </.form>
+</Layouts.app>

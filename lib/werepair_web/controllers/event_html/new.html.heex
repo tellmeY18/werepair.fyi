@@ -1,0 +1,26 @@
+<Layouts.app flash={@flash} current_scope={@current_scope}>
+  <h1>Create a repair event</h1>
+  <.form for={@form} action={~p"/events"} id="event-form">
+    <.input field={@form[:title]} label="Event name" required /><.input
+      field={@form[:theme]}
+      label="Theme / items accepted"
+      required
+    /><.input field={@form[:venue]} label="Public venue" required /><.input
+      field={@form[:starts_at]}
+      type="datetime-local"
+      label="Date and time (IST)"
+      required
+    /><.input field={@form[:latitude]} type="number" step="any" label="Venue latitude" required /><.input
+      field={@form[:longitude]}
+      type="number"
+      step="any"
+      label="Venue longitude"
+      required
+    /><.input
+      field={@form[:rules]}
+      type="textarea"
+      label="Safety rules & organiser responsibilities"
+      required
+    /><button>Create event</button>
+  </.form>
+</Layouts.app>

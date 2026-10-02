@@ -1,0 +1,44 @@
+<Layouts.app flash={@flash} current_scope={@current_scope}>
+  <h1>My profile</h1><a href={~p"/people/#{@current_scope.id}"}>View public profile</a>
+  <.track_record stats={@stats} />
+  <.form for={@form} action={~p"/profile"} method="post" id="profile-form">
+    <.input field={@form[:name]} label="Real name" required /><.input
+      field={@form[:area]}
+      label="Neighbourhood"
+      required
+    />
+    <.input field={@form[:phone]} label="Phone (private, unverified)" type="tel" required />
+    <.input field={@form[:bio]} label="About me" type="textarea" />
+    <.input
+      field={@form[:technician]}
+      label="List my repair skills in the technician directory"
+      type="checkbox"
+    />
+    <.input
+      field={@form[:skills]}
+      label="Skills / categories (e.g. Electronics, radios, soldering)"
+    />
+    <.input field={@form[:availability]} label="Availability / service area" />
+    <p>
+      Optional public map pin: use your neighbourhood centre or a shop you consent to display.
+    </p>
+    <.input field={@form[:latitude]} label="Latitude" type="number" step="any" /><.input
+      field={@form[:longitude]}
+      label="Longitude"
+      type="number"
+      step="any"
+    />
+    <button>Save profile</button>
+  </.form>
+  <h2>My requests & repairs</h2><a class="button" href={~p"/requests/new"}>Post a request</a><.request_list requests={
+    @requests
+  } />
+  <h2>My attended events</h2><ul>
+    <li :for={p <- @stats.events}>
+      <a href={~p"/events/#{p.event_id}"}>{p.event.title}</a> · {p.kind} · {p.hours} hours
+    </li>
+  </ul>
+  <p>
+    <a href={~p"/events"}>Browse events and manage sign-ups</a>. Mentoring unlocks after two completed repairs as technician.
+  </p>
+</Layouts.app>

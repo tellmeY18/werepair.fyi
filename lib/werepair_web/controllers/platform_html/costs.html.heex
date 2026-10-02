@@ -1,0 +1,23 @@
+<Layouts.app flash={@flash} current_scope={@current_scope}>
+  <h1>What it costs</h1><p class="headline">
+    This month: ₹{@spent} to run · ₹{@donated} donated · 0% taken from repairs
+  </p>
+  <p>
+    Technicians and requesters agree and settle prices directly. No payments pass through this platform. Ledger entries are manually maintained by the organiser.
+  </p>
+  <div class="table-wrap">
+    <table id="cost-ledger">
+      <thead>
+        <tr>
+          <th>Date</th><th>What</th><th>Paid by</th><th>Type</th><th>INR</th>
+        </tr>
+      </thead><tbody>
+        <tr :for={cost <- @costs}>
+          <td>{cost.date}</td><td>{cost.description}</td><td>{cost.paid_by}</td><td>
+            {cost.kind}
+          </td><td>₹{cost.amount}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</Layouts.app>
