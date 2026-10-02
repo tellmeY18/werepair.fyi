@@ -19,7 +19,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends libstdc++6 open
     && groupadd --gid 10001 app && useradd --uid 10001 --gid app --home-dir /app app
 WORKDIR /app
 COPY --from=build --chown=10001:10001 /app/_build/prod/rel/werepair ./
-ENV PHX_SERVER=true PORT=4000 ERL_CRASH_DUMP=/tmp/erl_crash.dump
+ENV PHX_SERVER=true PORT=4000 ERL_CRASH_DUMP=/tmp/erl_crash.dump LANG=C.UTF-8
 USER 10001:10001
 EXPOSE 4000
 CMD ["bin/werepair", "start"]
