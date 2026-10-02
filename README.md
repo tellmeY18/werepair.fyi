@@ -120,8 +120,8 @@ Community contexts; `lib/werepair_web/` contains controllers and HEEx components
 `priv/repo/seeds.exs` uses those same contexts for the demo scenarios.
 
 For a production release, supply `DATABASE_PATH`, `SECRET_KEY_BASE`, `PHX_HOST`
-and `PHX_SERVER=true`, and terminate HTTPS at your reverse proxy. This repository
-is a local POC, with no deployment performed.
+and `PHX_SERVER=true`, and terminate HTTPS at your reverse proxy.
+The seeded cluster demo is available at **https://repair.tellmey.fyi** via Traefik.
 
 ## Container demo
 
@@ -135,13 +135,23 @@ Recreate updates. An init container migrates and idempotently seeds an explicitl
 enabled demo. `PHX_SERVER=false` during initialization prevents early traffic.
 
 Runtime uses a non-root UID, read-only root filesystem, dropped capabilities,
-RuntimeDefault seccomp, no service-account token and denied egress. Only Traefik
-can reach port 4000. Email delivery is
+RuntimeDefault seccomp, no service-account token and denied egress. The cluster
+disables NetworkPolicy enforcement, so an approved root/NET_ADMIN init container
+installs a pod-local IPv4/IPv6 firewall and exits before the app starts. The app
+has no NET_ADMIN capability. Only inbound TCP/4000 and response traffic are allowed;
+new outbound connections to the cluster API, node API and internet were tested and
+blocked. Namespace admission allows this init-container exception; the runtime
+keeps its restricted settings. Email delivery is
 disabled in releases. Demo admins can modify demo records, not Kubernetes resources.
 Resource quotas, request-size/rate limits and the 1 GiB PVC bound demo resource use.
 
 The session-signing secret is generated in-cluster, never included in the image or
 repository. Image publication uses GitHub's short-lived workflow token; deployment
 credentials never enter GitHub Actions.
+
+CI caches both Docker layers and Hex/Rebar, dependencies and compiled test artifacts.
+Public demo pages and CSRF logins passed the HTTP smoke check after pod replacement;
+the existing SQLite data was retained. Run `BASE_URL=https://repair.tellmey.fyi just smoke`
+to repeat the check.
 
 Code: AGPL-3.0-only. Authored wiki seed content: CC BY-SA 4.0.
