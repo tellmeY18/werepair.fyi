@@ -19,9 +19,22 @@ jobs:
     container: hexpm/elixir:1.18.4-erlang-27.3.4-debian-bookworm-20250428-slim
     env:
       MIX_ENV: test
+      MIX_HOME: ${{ github.workspace }}/.nix-mix
+      HEX_HOME: ${{ github.workspace }}/.nix-hex
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - run: apt-get update && apt-get install -y --no-install-recommends build-essential ca-certificates
+      - uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            .nix-mix
+            .nix-hex
+            deps
+            _build/test
+          key: mix-linux-amd64-elixir-1.18.4-otp-27.3.4-v1-${{ hashFiles('mix.lock') }}-${{ github.sha }}
+          restore-keys: |
+            mix-linux-amd64-elixir-1.18.4-otp-27.3.4-v1-${{ hashFiles('mix.lock') }}-
+            mix-linux-amd64-elixir-1.18.4-otp-27.3.4-v1-
       - run: mix local.hex --force && mix local.rebar --force && mix deps.get
       - run: mix compile --warnings-as-errors && mix format --check-formatted && mix test
   image:
